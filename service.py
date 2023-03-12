@@ -65,9 +65,9 @@ async def get_id_channel(link):
         try:
             if re.search(r'\+', link):
                 hash_chat = re.sub(r'https://t.me/\+', '', link)
-                entity_channel = await client(ImportChatInviteRequest(hash_chat.strip()))
+                update = await client(ImportChatInviteRequest(hash_chat.strip()))
             else:
-                entity_channel = await client(JoinChannelRequest(link))
+                update = await client(JoinChannelRequest(link))
         except e.UserAlreadyParticipantError:
             entity_channel = await client.get_entity(link)
             return {'success': True, 'value': entity_channel.id, 'delete': False}
@@ -78,7 +78,7 @@ async def get_id_channel(link):
             print(error)
             return {'success': False, 'value': error, 'delete': False}
         else:
-            channel_id = entity_channel.chats[0].id
+            channel_id = update.chats[0].id
             return {'success': True, 'value': channel_id, 'delete': False}
 
 
