@@ -1,9 +1,9 @@
+import asyncio
 from fastapi import Body, FastAPI, Depends
 from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from models import ChannelBase
 from db import init_db, get_session
-from sqlalchemy.ext.asyncio import AsyncSession
-import asyncio
 from userbot import run_telethon
 from service import add_keywords, get_telegram_client, data_processing
 
@@ -25,5 +25,3 @@ async def update_item(channel: ChannelBase = Body(embed=True),
     data = await add_keywords(row, channel)
     response = await data_processing(data, session)
     return response
-
-
