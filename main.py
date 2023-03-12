@@ -1,19 +1,11 @@
-from fastapi import Body, FastAPI, Depends, HTTPException
+from fastapi import Body, FastAPI, Depends
 from sqlmodel import select
 from models import ChannelBase
 from db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
-import dotenv
-import os
-from userbot import run_main
-from service import add_keywords, get_telegram_client, add_data, delete_data
-
-dotenv.load_dotenv()
-dotenv_file = dotenv.find_dotenv()
-admin_channel = os.environ.get('ADMIN_CHANNEL')
-api_id = os.environ.get("API_ID")
-api_hash = os.environ.get("API_HASH")
+from userbot import run_telethon
+from service import add_keywords, get_telegram_client, data_processing
 
 app = FastAPI()
 
@@ -22,7 +14,7 @@ app = FastAPI()
 async def on_startup():
     client = await get_telegram_client()
     await init_db()
-    asyncio.create_task(run_main(client))
+    asyncio.create_task(run_telethon(client))
 
 
 @app.put("/listenchannel")
@@ -31,11 +23,7 @@ async def update_item(channel: ChannelBase = Body(embed=True),
     row = await session.scalars(select(ChannelBase).
                                 where(ChannelBase.link == channel.link))
     data = await add_keywords(row, channel)
-    if data['success'] is True and data['delete'] is True:
-        await delete_data(session, data['value'])
-        return "Канал успешно удалён"
-    if data['success'] is True:
-        value = await add_data(session, data['value'])
-        return value
-    else:
-        raise HTTPException(status_code=404, detail=data['value'])
+    response = await data_processing(data, session)
+    return response
+
+

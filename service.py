@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from models import ChannelBase
+from fastapi import HTTPException
 import dotenv
 import telethon.errors as e
 from telethon import TelegramClient
@@ -15,12 +16,14 @@ api_id = os.environ.get("API_ID")
 api_hash = os.environ.get("API_HASH")
 
 
-async def delete_data(session: AsyncSession, item: ChannelBase):
+async def delete_data(session: AsyncSession,
+                      item: ChannelBase):
     await session.delete(item)
     await session.commit()
 
 
-async def add_data(session: AsyncSession, item: ChannelBase):
+async def add_data(session: AsyncSession,
+                   item: ChannelBase):
     session.add(item)
     await session.commit()
     await session.refresh(item)
@@ -43,7 +46,8 @@ async def add_keywords(row, channel):
     else:
         result = await get_id_channel(link=channel.link)
         if result['success'] is True:
-            data = ChannelBase(link=channel.link, keywords=channel.keywords, channel_id=result['value'])
+            data = ChannelBase(link=channel.link, keywords=channel.keywords,
+                               channel_id=result['value'])
         else:
             return result
     return {'success': True, 'value': data, 'delete': False}
@@ -94,3 +98,14 @@ async def set_telestring():
         tele_string = client.session.save()
         set_env(key='TELETHON_STRING', value=tele_string.strip())
         return tele_string
+
+
+async def data_processing(data: dict, session: AsyncSession):
+    if data['success'] is True and data['delete'] is True:
+        await delete_data(session, data['value'])
+        return "Канал успешно удалён"
+    if data['success'] is True:
+        return await add_data(session, data['value'])
+    else:
+        text_error = str(data['value'])
+        raise HTTPException(status_code=404, detail=text_error)

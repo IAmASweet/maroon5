@@ -31,7 +31,8 @@ api_hash = os.environ.get("API_HASH")
 
 async def forward_message(chat: Union[Channel, Chat], message: str,
                           event: Union[Album, NewMessage, MessageEdited],
-                          sender: Union[Channel, Chat, User], client: TelegramClient) -> None:
+                          sender: Union[Channel, Chat, User],
+                          client: TelegramClient) -> None:
     url, keywords = await check_channels(chat.id)
     if keywords and message:
         result = check_keywords_in_message(message, keywords)
@@ -64,7 +65,8 @@ async def send_message_to_channel(event: Union[Album, NewMessage, MessageEdited]
         pass
 
 
-async def send_album_message(file: list, client: TelegramClient, text: str) -> None:
+async def send_album_message(file: list, client: TelegramClient,
+                             text: str) -> None:
     await client.send_message(
         admin_channel,
         file=file,
@@ -133,7 +135,7 @@ async def check_channels(chat_id: int) -> list:
         return [None, None]
 
 
-async def run_main(client):
+async def run_telethon(client):
     await client.start()
     try:
         if re.search(r'joinchat', admin_channel):
