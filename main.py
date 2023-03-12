@@ -24,6 +24,18 @@ def set_env(key, value):
     return value
 
 
+async def delete_data(session, item):
+    await session.delete(item)
+    await session.commit()
+
+
+async def add_data(session, item):
+    session.add(item)
+    await session.commit()
+    await session.refresh(item)
+    return item
+
+
 @app.on_event("startup")
 async def on_startup():
     client = await get_telegram_client()
@@ -35,11 +47,11 @@ async def on_startup():
 async def update_item(channel: ChannelBase = Body(embed=True), session: AsyncSession = Depends(get_session)):
     row = await session.scalars(select(ChannelBase).where(ChannelBase.link == channel.link))
     data = await add_keywords(row, channel)
-    if data['success']:
-        value = data['value']
-        session.add(value)
-        await session.commit()
-        await session.refresh(value)
+    if data['success'] is True and data['delete'] is True:
+        await delete_data(session, data['value'])
+        return "Канал успешно удалён"
+    if data['success'] is True:
+        value = await add_data(session, data['value'])
         return value
     else:
         raise HTTPException(status_code=404, detail=data['value'])

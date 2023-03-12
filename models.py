@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, List
 from pydantic import AnyHttpUrl
 from sqlmodel import Field, SQLModel, JSON, Column
 

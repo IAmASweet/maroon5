@@ -1,8 +1,9 @@
+import asyncio
 import datetime
 from telethon.errors.rpcerrorlist import MessageIdInvalidError, QuizAnswerMissingError, \
     TopicDeletedError, TimeoutError, \
     BroadcastPublicVotersForbiddenError, ChannelPrivateError, ChannelInvalidError, InviteRequestSentError, \
-    ChannelsTooMuchError, UserAlreadyParticipantError
+    ChannelsTooMuchError, UserAlreadyParticipantError, FloodWaitError
 from telethon.tl.types import Channel, Chat, User
 from telethon import events
 from telethon.events import Album, NewMessage, MessageEdited
@@ -143,6 +144,9 @@ async def run_main(client):
             await client(ImportChatInviteRequest(hash_chat.strip()))
         else:
             await client(JoinChannelRequest(admin_channel))
+    except FloodWaitError as error:
+        print(error)
+        await asyncio.sleep(error.seconds)
     except (ValueError, ChannelInvalidError, ChannelPrivateError, InviteRequestSentError,
             ChannelsTooMuchError, UserAlreadyParticipantError) as error:
         print(error)

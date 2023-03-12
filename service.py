@@ -23,6 +23,9 @@ def set_env(key, value):
 async def add_keywords(row, channel):
     data = row.first()
     if data:
+        if len(channel.keywords) < 1:
+            await leave_a_chat(data.link)
+            return {'success': True, 'value': data, 'delete': True}
         data.keywords = channel.keywords
     else:
         result = await get_id_channel(link=channel.link)
@@ -30,7 +33,13 @@ async def add_keywords(row, channel):
             data = ChannelBase(link=channel.link, keywords=channel.keywords, channel_id=result['value'])
         else:
             return result
-    return {'success': True, 'value': data}
+    return {'success': True, 'value': data, 'delete': False}
+
+
+async def leave_a_chat(link):
+    client: TelegramClient = await get_telegram_client()
+    async with client:
+        await client.delete_dialog(link)
 
 
 async def get_id_channel(link):
@@ -44,16 +53,16 @@ async def get_id_channel(link):
                 entity_channel = await client(JoinChannelRequest(link))
         except e.UserAlreadyParticipantError:
             entity_channel = await client.get_entity(link)
-            return {'success': True, 'value': entity_channel.id}
+            return {'success': True, 'value': entity_channel.id, 'delete': False}
         except (ValueError, e.ChannelInvalidError,
                 e.ChannelPrivateError,
                 e.InviteRequestSentError,
                 e.ChannelsTooMuchError) as error:
             print(error)
-            return {'success': False, 'value': error}
+            return {'success': False, 'value': error, 'delete': False}
         else:
             channel_id = entity_channel.chats[0].id
-            return {'success': True, 'value': channel_id}
+            return {'success': True, 'value': channel_id, 'delete': False}
 
 
 async def get_telegram_client():
