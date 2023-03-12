@@ -24,12 +24,12 @@ def set_env(key, value):
     return value
 
 
-async def delete_data(session, item):
+async def delete_data(session: AsyncSession, item: ChannelBase):
     await session.delete(item)
     await session.commit()
 
 
-async def add_data(session, item):
+async def add_data(session: AsyncSession, item: ChannelBase):
     session.add(item)
     await session.commit()
     await session.refresh(item)
