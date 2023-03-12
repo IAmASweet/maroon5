@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from models import ChannelBase
 import dotenv
@@ -12,6 +13,18 @@ dotenv.load_dotenv()
 dotenv_file = dotenv.find_dotenv()
 api_id = os.environ.get("API_ID")
 api_hash = os.environ.get("API_HASH")
+
+
+async def delete_data(session: AsyncSession, item: ChannelBase):
+    await session.delete(item)
+    await session.commit()
+
+
+async def add_data(session: AsyncSession, item: ChannelBase):
+    session.add(item)
+    await session.commit()
+    await session.refresh(item)
+    return item
 
 
 def set_env(key, value):
