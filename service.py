@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 import dotenv
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,15 +68,15 @@ async def get_id_channel(link):
             if re.search(r'\+', link):
                 hash_chat = re.sub(r'https://t.me/\+', '', link)
                 update = await client(ImportChatInviteRequest(hash_chat.strip()))
+            elif re.search(r'joinchat', link):
+                hash_chat = re.sub('https://t.me/joinchat/', '', link)
+                await client(ImportChatInviteRequest(hash_chat.strip()))
             else:
                 update = await client(JoinChannelRequest(link))
         except e.UserAlreadyParticipantError:
             entity_channel = await client.get_entity(link)
             return {'success': True, 'value': entity_channel.id, 'delete': False}
-        except (ValueError, e.ChannelInvalidError,
-                e.ChannelPrivateError,
-                e.InviteRequestSentError,
-                e.ChannelsTooMuchError) as error:
+        except Exception as error:
             print(error)
             return {'success': False, 'value': error, 'delete': False}
         else:

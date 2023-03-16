@@ -151,8 +151,7 @@ async def run_telethon(client):
     except FloodWaitError as error:
         print(error)
         await asyncio.sleep(error.seconds)
-    except (ValueError, ChannelInvalidError, ChannelPrivateError, InviteRequestSentError,
-            ChannelsTooMuchError, UserAlreadyParticipantError) as error:
+    except Exception as error:
         print(error)
         pass
 

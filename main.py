@@ -7,7 +7,7 @@ from db import init_db, get_session
 from userbot import run_telethon
 from service import add_keywords, get_telegram_client, data_processing
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 @app.on_event("startup")
