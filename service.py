@@ -1,6 +1,5 @@
 import os
 import re
-import asyncio
 import dotenv
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
