@@ -69,7 +69,7 @@ async def get_id_channel(link):
                 update = await client(ImportChatInviteRequest(hash_chat.strip()))
             elif re.search(r'joinchat', link):
                 hash_chat = re.sub('https://t.me/joinchat/', '', link)
-                await client(ImportChatInviteRequest(hash_chat.strip()))
+                update = await client(ImportChatInviteRequest(hash_chat.strip()))
             else:
                 update = await client(JoinChannelRequest(link))
         except e.UserAlreadyParticipantError:
